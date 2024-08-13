@@ -1,0 +1,15 @@
+flask
+requests
+pinecone-client
+flask-cors
+python-dotenv
+boto3
+Werkzeug
+langchain-community
+rank_bm25
+langchain-core
+langchain-openai
+langchain-text-splitters
+langchain-pinecone
+pypdf
+redis
