@@ -1,10 +1,8 @@
 #use this to store and delete files from aws
 import boto3
 from dotenv import load_dotenv
-from werkzeug.utils import secure_filename
 import os
 import uuid
-#get fileid creator method
 
 class AwsService:
     client = None
@@ -18,12 +16,9 @@ class AwsService:
     Take file as input, upload to s3 with specific bucket, and fileid
     return 
     """
-    def uploadFile(self, file, destBucket): 
-        #generate random file id
-        self.client.upload_fileobj(file, destBucket, file.filename)
-        #Save file by file id generated
-        #or save fileid, where to store
+    def uploadFile(self, file, destBucket, local_path): 
+        
+        self.client.upload_fileobj(file, destBucket, local_path)
+        #TODO: generate random file id, save file by fileid on S3
         fileid= uuid.uuid1()
         return fileid
-    
-    #fetch a file from s3 bucket

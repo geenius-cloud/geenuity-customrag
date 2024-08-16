@@ -3,6 +3,7 @@ from app.service.aws_service import AwsService
 from app.service.embedding_service import EmbedService
 from app.service.openai_service import OpenaiService
 import os
+from werkzeug.utils import secure_filename
 
 api_blueprint = Blueprint('api', __name__)
 aws_service = AwsService()
@@ -25,18 +26,27 @@ def uploadFile():
         print("Question not found")
         return 'No file found', 400
     file = request.files.get('file')
-    #Write file to S3 bucket
-    destBucket = "geenuity-custom-mantra-user-rag-files"
-    fileid = aws_service.uploadFile(file, destBucket)
+
     #Save file to local folder to read and process
-    if file:
-        filename = os.path.join(UPLOAD_FOLDER, file.filename)
-        filename = filename.lower()
-        file.save(filename)
-    
+    if file and file.filename:
+        filename = secure_filename(file.filename)
+        local_path = os.path.join(UPLOAD_FOLDER, filename)
+       
+        file.save(local_path)
+
+        #Write file to S3 bucket
+        destBucket = "geenuity-custom-mantra-user-rag-files"
+        try:
+            with open(local_path, 'rb') as file_obj:
+                fileid = aws_service.uploadFile(file_obj, destBucket, filename)
+            print(f"File uploaded successfully to {destBucket}/{filename}")
+        except Exception as e:
+            print(f"Error uploading file to S3: {str(e)}")
+            return 'Error uploading file to S3', 500
+
     question = request.form.get('question')
 
-    #TODO: Add a userid/auth mechanism to distinguish useruserid = '1234D'
+    #TODO: Add a userid/auth mechanism to distinguish user eg:userid = '1234D'
     docs = embed_service.get_document_text(file, filename)
    
     ensemble_retriever = embed_service.ensemble_retriever_from_docs(docs, openai_service.fetchEmbeddings(model="text-embedding-ada-002"))

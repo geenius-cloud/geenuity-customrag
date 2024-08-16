@@ -1,4 +1,3 @@
-#from langchain.vectorstores.base import PineconeVectorStore
 from pinecone import Pinecone, ServerlessSpec
 import os
 from dotenv import load_dotenv
@@ -33,7 +32,7 @@ class EmbedService():
         for num, page in enumerate(pdf_reader.pages):
             page = page.extract_text()
             doc = Document(page_content=page, metadata={'title': title, 'page': (num + 1)})
-            docs.append(doc)    
+            docs.append(doc)
 
         return docs
     
@@ -99,7 +98,6 @@ class EmbedService():
         return "\n\n".join(doc.page_content for doc in docs)
     
     def make_rag_chain(self, model, retriever, rag_prompt = None):
-        # We will use a prompt template from langchain hub.
         if not rag_prompt:
             rag_prompt = hub.pull("rlm/rag-prompt")
 
@@ -111,7 +109,6 @@ class EmbedService():
         )
         return rag_chain
 
-    # create a rag chain
     def create_full_chain(self, retriever, openai_api_key=None):
         model = ChatOpenAI(temperature=0, openai_api_key=openai_api_key)
         system_prompt = """You are a helpful AI assistant for busy professionals trying to improve their knowledge of the stock market by reading research papers.
